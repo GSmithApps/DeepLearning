@@ -1,9 +1,21 @@
 using Plots
 
-using Colors
+range = LinRange(0,1,75)
 
-# randomly generate some domain points in 2D as Float32
-domainPoints = rand(Float32, 2, 1000)
+domainPoints = zeros(2,length(range) ^ 2)
+
+i = 1
+
+for x in range
+  for y in range
+    domainPoints[1,i] = x
+    domainPoints[2,i] = y
+    i = i + 1
+  end
+end
+
+domainPoints
+
 
 # classify them with an exclusive or
 labels = [(col[1] < .5) ⊻ (col[2] < .5) for col in eachcol(domainPoints)]
@@ -17,19 +29,25 @@ scatter(domainPoints[1,:], domainPoints[2,:], color=labels)
 
 using Flux
 
+labels = Flux.onehotbatch(labels, [0,1])
+
+typeof(labels)
+
 # define a simple 2 layer neural network
 model = Chain(
   Dense(2, 16, σ),
-  Dense(16, 1, σ),
+  Dense(16, 2, σ),
 )
 
 
 # train the model
-loss(x, y) = Flux.mse(model(x), y)
+loss(x, y) = Flux.Losses.crossentropy(model(x), y)
 
 opt = ADAM(0.1)
 
-data = [(domainPoints[:, i], labels[i]) for i in eachindex(labels)]
+size(labels)
+size(domainPoints)
+data = [(domainPoints[:, i], labels[:,i]) for i in eachindex(labels)]
 
 for i in 1:100
   Flux.train!(loss, Flux.params(model), data, opt)
