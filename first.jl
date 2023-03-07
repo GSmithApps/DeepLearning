@@ -12,9 +12,7 @@ model = Chain(
 # train the model
 loss(x, y) = Flux.Losses.crossentropy(model(x), y)
 
-lr = 0.1
 
-# create a function with a body
 
 function generateAndReturnDomain()
   """
@@ -52,6 +50,8 @@ labelsOneHot = Flux.onehotbatch(labels, [0,1])
 data = (domainPoints, labelsOneHot)
 
 train_loss = []
+
+lr = 0.1
 
 
 @showprogress for i in 1:100
